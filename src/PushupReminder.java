@@ -41,7 +41,7 @@ public class PushupReminder {
                     Menu menu = new Menu(shell, SWT.POP_UP);
 
                     MenuItem exitItem = new MenuItem(menu, SWT.PUSH);
-                    exitItem.setText("exit");
+                    exitItem.setText("Exit");
                     exitItem.addSelectionListener(new SelectionAdapter() {
                         @Override
                         public void widgetSelected(SelectionEvent event) {
