@@ -5,14 +5,13 @@ endif
 ifeq ($(build-arch),i686)
 	build-arch = i386
 endif
-ifeq ('$(build-arch)','Power Macintosh')
-	build-arch = powerpc
-endif
 
-build-platform = \
+build-platform := \
 	$(shell uname -s | tr [:upper:] [:lower:] \
-		| sed 's/^mingw32.*$$/mingw32/' \
-		| sed 's/^cygwin.*$$/cygwin/')
+		| sed \
+			-e 's/^mingw32.*$$/mingw32/' \
+			-e 's/^cygwin.*$$/cygwin/' \
+			-e 's/^darwin.*$$/macosx/')
 
 arch = $(build-arch)
 platform = $(subst cygwin,windows,$(subst mingw32,windows,$(build-platform)))
@@ -36,14 +35,14 @@ endif
 root = ..
 base = $(shell pwd)
 vm = $(root)/avian
-swt = $(root)/swt-3.5/$(platform)-$(arch)/swt.jar
+swt = $(root)/swt-4.4/$(platform)-$(arch)/swt.jar
 src = src
 bld = build/$(platform)-$(arch)$(options)/$(name)
 stage1 = $(bld)/stage1
 stage2 = $(bld)/stage2
 vm-bld = $(vm)/build/$(platform)-$(arch)$(options)
 
-ifneq ($(platform),darwin)
+ifneq ($(platform),macosx)
 	ifeq ($(arch),i386)
 		mflag = -m32
 	endif
@@ -94,28 +93,15 @@ lflags = $(common-lflags) -rdynamic -lpthread -ldl
 ifeq ($(arch),i386)
 	pointer-size = 4
 endif
-ifeq ($(arch),powerpc)
-	asm = powerpc
-	pointer-size = 4
-endif
 
-ifeq ($(platform),darwin)
-	ifneq ($(arch),x86_64)
-# SWT >= 3.5 only works on OS X 10.5 and above, so we use 3.4 instead
-		swt = $(root)/swt-3.4/$(platform)-$(arch)/swt.jar
-	endif
-
+ifeq ($(platform),macosx)
 	cflags = $(common-cflags)	-Wno-deprecated -Wno-deprecated-declarations
 	lflags = $(common-lflags) -ldl -framework CoreFoundation -framework Carbon
 	upx = :
 	strip = strip -S -x
 
-	ifeq ($(arch),powerpc)
-		cross-flags := -mmacosx-version-min=10.4 -arch ppc
-	endif
-
 	ifeq ($(arch),i386)
-		cross-flags := -mmacosx-version-min=10.4 -arch i386
+		cross-flags := -mmacosx-version-min=10.6 -arch i386
 	endif
 
 	so-suffix = .jnilib
